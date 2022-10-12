@@ -125,6 +125,7 @@ public class AddContactFragment extends Fragment {
                     toast.show();
                 }
                 if( phone.isEmpty()){
+                    System.out.println();
                     Toast toast = Toast.makeText(getActivity(), "Empty phone number", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
@@ -134,37 +135,44 @@ public class AddContactFragment extends Fragment {
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                 }
+                else{
+                    System.out.println("Everything is entered correct");
+                    FormBody formBody = new FormBody.Builder()
+                            .add("name", name)
+                            .add("email", email)
+                            .add("phone", phone)
+                            .add("type", type)
+                            .build();
+                    Request request = new Request.Builder()
+                            .url("https://www.theappsdr.com/contact/json/create?name&email&phone&type")
+                            .post(formBody)
+                            .build();
 
-                FormBody formBody = new FormBody.Builder()
-                        .add("Name", name)
-                        .add("Email", email)
-                        .add("Phone", phone)
-                        .add("PhoneType", type)
-                        .build();
-                Request request = new Request.Builder()
-                        .url("https://www.theappsdr.com/contact/json/create")
-                        .post(formBody)
-                        .build();
 
-
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()){
-                            ResponseBody responseBody = response.body();
-                            String body = responseBody.string();
-                            Log.d("demo", "onResponse: "+body);
-
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            e.printStackTrace();
+                            System.out.println("Failure");
                         }
 
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            if (response.isSuccessful()){
+                                System.out.println("You response is succesful");
+                                ResponseBody responseBody = response.body();
+                                String body = responseBody.string();
+                                Log.d("demo", "onResponse: "+body);
+                                mListener.gobackContact();
+                            }
 
-                    }
-                });
+
+                        }
+                    });
+
+                }
+
+
 
             }
         });

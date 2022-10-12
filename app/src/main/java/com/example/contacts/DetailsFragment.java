@@ -7,13 +7,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,8 +31,7 @@ import okhttp3.OkHttpClient;
  */
 public class DetailsFragment extends Fragment {
 
-    //OkHttpClient client = new OkHttpClient();
-
+    private final OkHttpClient client = new OkHttpClient();
     private static final String ARG_CONTACT = "param";
 
     private Contact mContact;
@@ -73,7 +81,34 @@ public class DetailsFragment extends Fragment {
         trash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FormBody formBody = new FormBody.Builder()
+                        .add("Name", mContact.getName())
+                        .build();
+                Request request = new Request.Builder()
+                        .url("https://www.theappsdr.com/contact/json/delete?Name")
+                        .post(formBody)
+                        .build();
 
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        System.out.println("Failure");
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()){
+                            System.out.println("You response is succesful");
+                            ResponseBody responseBody = response.body();
+                            String body = responseBody.string();
+                            Log.d("demo", "onResponse: "+body);
+                        }
+
+
+                    }
+                });
                 mListener.sendDeleteContact(mContact);
             }
         });

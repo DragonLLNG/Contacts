@@ -109,7 +109,6 @@ public class MainFragment extends Fragment {
                                 ContactAdapter adapter;
                                 adapter = new ContactAdapter(getActivity().getBaseContext(), R.layout.contact_details, contacts);
                                 listView.setAdapter(adapter);
-
                                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
