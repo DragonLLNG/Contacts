@@ -29,25 +29,15 @@ import okhttp3.Response;
 
 public class MainFragment extends Fragment {
 
-    private final OkHttpClient client = new OkHttpClient();
-    ArrayList<Contact> contacts = new ArrayList<>();
-
+    private static final OkHttpClient client = new OkHttpClient();
+    static ArrayList<Contact> contacts = new ArrayList<>();
 
     private static final String ARG_CONTACT = "param";
-
     private Contact mContact;
 
     public MainFragment() {
     }
 
-
-    public static MainFragment newInstance(Contact contact) {
-        MainFragment fragment = new MainFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_CONTACT,contact);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,66 +59,7 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Request request = new Request.Builder().url("https://www.theappsdr.com/contacts/json").build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(response.isSuccessful()){
-                    try {
-                        String body = response.body().string();
-                        JSONObject json = new JSONObject(body);
-
-                        JSONArray contactArray = json.getJSONArray("contacts");
-
-
-                        for (int i=0; i<contactArray.length();i++){
-                            JSONObject contactObject = contactArray.getJSONObject(i);
-
-                            Contact contact = new Contact();
-                            contact.setId(contactObject.getString("Cid"));
-                            contact.setName(contactObject.getString("Name"));
-                            contact.setEmail(contactObject.getString("Email"));
-                            contact.setPhone(contactObject.getString("Phone"));
-                            contact.setPhoneType(contactObject.getString("PhoneType"));
-
-                            contacts.add(contact);
-
-                        }
-
-                        // Log.d("demo", "onResponse: "+contacts.get(0));
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                ListView listView = view.findViewById(R.id.listView);
-                                ContactAdapter adapter;
-                                adapter = new ContactAdapter(getActivity().getBaseContext(), R.layout.contact_details, contacts);
-                                listView.setAdapter(adapter);
-                                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                        Contact contact = adapter.getItem(position);
-                                        mListener.sendContact(contact);
-                                       // adapter.notifyDataSetChanged();
-                                    }
-                                });
-
-                            }
-                        });
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-        });
+        getContactList(view);
 
         Button add = view.findViewById(R.id.addBttn);
         add.setOnClickListener(new View.OnClickListener() {
@@ -146,12 +77,75 @@ public class MainFragment extends Fragment {
         void sendContact(Contact contact);
 
     }
-    MainFragmentListener mListener;
 
+    MainFragmentListener mListener;
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mListener = (MainFragmentListener) context;
     }
 
+
+    public void getContactList(View view){
+        Request request = new Request.Builder().url("https://www.theappsdr.com/contacts/json").build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+
+                if(response.isSuccessful()){
+
+                    try {
+                        String body = response.body().string();
+                        JSONObject json = new JSONObject(body);
+
+                        JSONArray contactArray = json.getJSONArray("contacts");
+                        Contact contact = new Contact();
+                        for (int i=0; i<contactArray.length();i++){
+                            JSONObject contactObject = contactArray.getJSONObject(i);
+
+                            contact.setId(contactObject.getString("Cid"));
+                            contact.setName(contactObject.getString("Name"));
+                            contact.setEmail(contactObject.getString("Email"));
+                            contact.setPhone(contactObject.getString("Phone"));
+                            contact.setPhoneType(contactObject.getString("PhoneType"));
+                            contacts.add(contact);
+
+                            Log.d("demo", "onResponse: "+contacts.size());
+                        }
+
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ListView listView = view.findViewById(R.id.listView);
+                                ContactAdapter adapter;
+                                adapter = new ContactAdapter(getActivity().getBaseContext(), R.layout.contact_details, contacts);
+                                listView.setAdapter(adapter);
+                                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        Contact contact = adapter.getItem(position);
+                                        mListener.sendContact(contact);
+                                        //adapter.notifyDataSetChanged();
+                                    }
+                                });
+
+                            }
+                        });
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+    }
+
 }
+

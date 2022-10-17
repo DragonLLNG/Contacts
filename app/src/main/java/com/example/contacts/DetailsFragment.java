@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,8 +34,8 @@ public class DetailsFragment extends Fragment {
 
     private final OkHttpClient client = new OkHttpClient();
     private static final String ARG_CONTACT = "param";
-
     private Contact mContact;
+    private Context context;
 
     public DetailsFragment() {
     }
@@ -77,52 +78,6 @@ public class DetailsFragment extends Fragment {
         phone.setText(mContact.getPhone());
         type.setText(mContact.getPhoneType());
 
-        ImageView trash = view.findViewById(R.id.imageView);
-        trash.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FormBody formBody = new FormBody.Builder()
-                        .add("Name", mContact.getName())
-                        .build();
-                Request request = new Request.Builder()
-                        .url("https://www.theappsdr.com/contact/json/delete?Name")
-                        .post(formBody)
-                        .build();
-
-
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                        System.out.println("Failure");
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()){
-                            System.out.println("You response is succesful");
-                            ResponseBody responseBody = response.body();
-                            String body = responseBody.string();
-                            Log.d("demo", "onResponse: "+body);
-                        }
-
-
-                    }
-                });
-                mListener.sendDeleteContact(mContact);
-            }
-        });
-
     }
-    public interface DetailFragmentListener{
-        void sendDeleteContact(Contact contact);
 
-    }
-    DetailFragmentListener mListener;
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        mListener = (DetailFragmentListener) context;
-    }
 }

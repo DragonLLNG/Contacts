@@ -1,21 +1,31 @@
 package com.example.contacts;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
-public class MainActivity extends AppCompatActivity implements MainFragment.MainFragmentListener, AddContactFragment.AddContactFragmentListener, DetailsFragment.DetailFragmentListener {
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class MainActivity extends AppCompatActivity implements MainFragment.MainFragmentListener, AddContactFragment.AddContactFragmentListener {
+    private final OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.rootView, new MainFragment())
                 .commit();
-
     }
 
     @Override
@@ -27,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Main
 
     }
 
+
     @Override
     public void sendContact(Contact contact) {
         getSupportFragmentManager().beginTransaction()
@@ -35,17 +46,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Main
                 .commit();
     }
 
+
     @Override
-    public void gobackContact() {
+    public void backContact() {
         getSupportFragmentManager().popBackStack();
 
     }
 
-    @Override
-    public void sendDeleteContact(Contact contact) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.rootView, MainFragment.newInstance(contact))
-                .addToBackStack(null)
-                .commit();
-    }
+
 }
